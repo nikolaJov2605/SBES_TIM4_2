@@ -16,6 +16,10 @@ namespace Client
         {
             factory = this.CreateChannel();
         }
+        public MakeClient(Binding binding, EndpointAddress remoteAddress) : base(binding, remoteAddress)
+        {
+            factory = this.CreateChannel();
+        }
 
         public string Connect()
         {
