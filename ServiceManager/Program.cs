@@ -38,7 +38,13 @@ namespace ServiceManager
 
             host.Authorization.ExternalAuthorizationPolicies = polices.AsReadOnly();
 
+            // Podesavanje AuditBehavior-a
+            ServiceSecurityAuditBehavior newAudit = new ServiceSecurityAuditBehavior();
+            newAudit.AuditLogLocation = AuditLogLocation.Application;
+            newAudit.ServiceAuthorizationAuditLevel = AuditLevel.SuccessOrFailure;
 
+            host.Description.Behaviors.Remove<ServiceSecurityAuditBehavior>();
+            host.Description.Behaviors.Add(newAudit);
 
 
             host.Open();
