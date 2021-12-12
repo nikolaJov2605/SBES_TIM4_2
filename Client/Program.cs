@@ -26,11 +26,14 @@ namespace Client
                 Console.WriteLine(WindowsIdentity.GetCurrent().Name);
                 string key = proxy.Connect();
                 Console.WriteLine(key);
-                string data;
-                AES_CBC.EncryptData("MortalKombat,8080,TCP ", key, out data);
-                Console.WriteLine(data);
-                proxy.StartNewService(data);
 
+                if(!key.Equals(string.Empty)) //Access denied. Program pukne jer kljuc ne odgovara
+                {
+                    string data;
+                    AES_CBC.EncryptData("MortalKombat,8080,TCP ", key, out data);
+                    Console.WriteLine(data);
+                    proxy.StartNewService(data);
+                }
             }
 
             Console.ReadLine();
