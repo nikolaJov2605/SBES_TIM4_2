@@ -21,5 +21,8 @@ namespace Contract
 
         [OperationContract]
         void LogServiceStartDenied();
+
+        [OperationContract]
+        void LogAuthorizationSuccess(string username, string serviceName);
     }
 }

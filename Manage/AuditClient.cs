@@ -86,5 +86,17 @@ namespace Manage
                 Console.WriteLine("[LogServiceStartDenied] ERROR = {0}", e.Message);
             }
         }
+
+        public void LogAuthorizationSuccess(string username, string serviceName)
+        {
+            try
+            {
+                factory.LogAuthorizationSuccess(username, serviceName);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("[LogAuthorizationSuccess] ERROR = {0}", e.Message);
+            }
+        }
     }
 }

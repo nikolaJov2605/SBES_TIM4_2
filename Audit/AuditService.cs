@@ -21,6 +21,18 @@ namespace Audit
             }
         }
 
+        public void LogAuthorizationSuccess(string username, string serviceName)
+        {
+            try
+            {
+                Audit.AuthorizationSuccess(username, serviceName);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+
         public void LogServiceStartDenied()
         {
             try
