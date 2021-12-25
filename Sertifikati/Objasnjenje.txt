@@ -1,0 +1,10 @@
+1. Pogledati sliku Podesavanje.png i ispratiti korake
+	pass za svaki je 123456
+2. Kreirati 3 korisnicka naloga na Win
+	Auditer, Manager, User(opciono)
+	User mora da se ubacuje u odgovarajuce grupe
+3. Instalirati Auditer cert u Trusted People
+
+POKRETANJE: Auditer -> Audit
+	    Manager -> ServiceManager
+	    neki User -> Client

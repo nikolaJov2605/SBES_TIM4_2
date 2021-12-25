@@ -1,9 +1,11 @@
-﻿using Contract;
+﻿using AuditManager;
+using Contract;
 using Manage;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Policy;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 using System.ServiceModel;
 using System.ServiceModel.Description;
@@ -50,6 +52,22 @@ namespace ServiceManager
             host.Open();
             Console.WriteLine(WindowsIdentity.GetCurrent().Name);
             Console.WriteLine("Server is successfully opened");
+
+            string srvCertCN = "Auditer";
+
+            binding = new NetTcpBinding();
+            binding.Security.Transport.ClientCredentialType = TcpClientCredentialType.Certificate;
+
+            /// Use CertManager class to obtain the certificate based on the "srvCertCN" representing the expected service identity.
+            X509Certificate2 srvCert = CertManager.GetCertificateFromStorage(StoreName.TrustedPeople, StoreLocation.LocalMachine, srvCertCN);
+            EndpointAddress addressAudit = new EndpointAddress(new Uri("net.tcp://localhost:9999/Audit"),
+                                      new X509CertificateEndpointIdentity(srvCert));
+
+            using (AuditClient proxy = new AuditClient(binding, addressAudit))
+            {
+                /// 1. Communication test
+                proxy.TestCommunication();
+            }
             Console.ReadLine();
         }
     }

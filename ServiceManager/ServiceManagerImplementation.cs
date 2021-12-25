@@ -1,10 +1,11 @@
-﻿using Audit;
+﻿using AuditManager;
 using Contract;
 using Manage;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Security.Permissions;
 using System.ServiceModel;
 using System.Text;
@@ -31,7 +32,7 @@ namespace ServiceManager
         public bool StartNewService(string encryptedMessage)
         {
             CustomPrincipal principal = Thread.CurrentPrincipal as CustomPrincipal;
-            string userName = Formatter.ParseName(principal.Identity.Name);
+            string userName = Manage.Formatter.ParseName(principal.Identity.Name);
 
             if(Thread.CurrentPrincipal.IsInRole("RunService"))
             {
@@ -41,7 +42,19 @@ namespace ServiceManager
 
                 try
                 {
-                    Audit.Audit.ServiceStarted(userName);
+                    //Audit.Audit.ServiceStarted(userName);
+                    NetTcpBinding binding = new NetTcpBinding();
+                    binding.Security.Transport.ClientCredentialType = TcpClientCredentialType.Certificate;
+
+                    /// Use CertManager class to obtain the certificate based on the "srvCertCN" representing the expected service identity.
+                    X509Certificate2 srvCert = CertManager.GetCertificateFromStorage(StoreName.TrustedPeople, StoreLocation.LocalMachine, "Auditer");
+                    EndpointAddress addressAudit = new EndpointAddress(new Uri("net.tcp://localhost:9999/Audit"),
+                                              new X509CertificateEndpointIdentity(srvCert));
+                    using (AuditClient proxy = new AuditClient(binding, addressAudit))
+                    {
+                        proxy.LogAuthorizationSuccess(userName, OperationContext.Current.IncomingMessageHeaders.Action);
+                        proxy.LogServiceStarted(userName);
+                    }
                 }
                 catch (Exception e)
                 {
@@ -52,7 +65,19 @@ namespace ServiceManager
             {
                 try
                 {
-                    Audit.Audit.ServiceStartDenied();
+                    //Audit.Audit.ServiceStartDenied();
+                    NetTcpBinding binding = new NetTcpBinding();
+                    binding.Security.Transport.ClientCredentialType = TcpClientCredentialType.Certificate;
+
+                    /// Use CertManager class to obtain the certificate based on the "srvCertCN" representing the expected service identity.
+                    X509Certificate2 srvCert = CertManager.GetCertificateFromStorage(StoreName.TrustedPeople, StoreLocation.LocalMachine, "Auditer");
+                    EndpointAddress addressAudit = new EndpointAddress(new Uri("net.tcp://localhost:9999/Audit"),
+                                              new X509CertificateEndpointIdentity(srvCert));
+                    using (AuditClient proxy = new AuditClient(binding, addressAudit))
+                    {
+                        proxy.LogAuthorizationFailed(userName, OperationContext.Current.IncomingMessageHeaders.Action, "StartNewService need RunService permission");
+                        proxy.LogServiceStartDenied();
+                    }
                 }
                 catch (Exception e)
                 {
