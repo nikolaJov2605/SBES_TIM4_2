@@ -1,3 +1,6 @@
+MORA DA SE UNZIPUJE ZBOG PRIVATNOG KLJUCA
+ne ubacuje se .pfx fajl na git
+
 1. Pogledati sliku Podesavanje.png i ispratiti korake
 	pass za svaki je 123456
 2. Kreirati 3 korisnicka naloga na Win
