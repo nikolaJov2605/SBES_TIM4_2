@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.1738
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30611.23
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "Client\Client.csproj", "{DCA1C2B6-D4FD-4622-B014-64BED676C6D0}"
 EndProject
@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contract", "Contract\Contra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Manage", "Manage\Manage.csproj", "{17AB553A-D74F-4014-99DE-610BA51E81FF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuditManager", "AuditManager\AuditManager.csproj", "{2494DECE-BB40-46BD-AD68-EC97EE64597C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CertHelper", "AuditManager\CertHelper.csproj", "{2494DECE-BB40-46BD-AD68-EC97EE64597C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

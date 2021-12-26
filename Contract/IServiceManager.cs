@@ -12,7 +12,7 @@ namespace Contract
     {
         [OperationContract]
         [FaultContract(typeof(SecurityException))]
-        string Connect();
+        bool Connect(byte[] encryptedSessionKey);
 
         [OperationContract]
         [FaultContract(typeof(SecurityException))]

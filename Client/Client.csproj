@@ -52,6 +52,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AuditManager\CertHelper.csproj">
+      <Project>{2494DECE-BB40-46BD-AD68-EC97EE64597C}</Project>
+      <Name>CertHelper</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Contract\Contract.csproj">
       <Project>{7F08734C-5C6C-44B4-832B-A9975A0CA317}</Project>
       <Name>Contract</Name>

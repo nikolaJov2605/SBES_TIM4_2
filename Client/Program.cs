@@ -1,7 +1,9 @@
-﻿using Manage;
+﻿using AuditManager;
+using Manage;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 using System.ServiceModel;
 using System.Text;
@@ -13,6 +15,9 @@ namespace Client
     {
         static void Main(string[] args)
         {
+            byte[] sessionKey;
+            string serviceCert = "Manager";
+
             NetTcpBinding binding = new NetTcpBinding();
             string address = "net.tcp://localhost:8888/WCFService";
 
@@ -24,15 +29,23 @@ namespace Client
             using (MakeClient proxy = new MakeClient(binding, new EndpointAddress(new Uri(address))))
             {
                 Console.WriteLine(WindowsIdentity.GetCurrent().Name);
-                string key = proxy.Connect();
-                Console.WriteLine(key);
+                sessionKey = SessionKeyHelper.CreateSessionKey();
 
-                if(!key.Equals(string.Empty)) //Access denied. Program pukne jer kljuc ne odgovara
+                //pronaci u trusted people serverski sertifikat
+                X509Certificate2 certificate = CertManager.GetCertificateFromStorage(StoreName.TrustedPeople, StoreLocation.LocalMachine, serviceCert);
+
+                byte[] encryptedSessionKey = SessionKeyHelper.EncryptSessionKey(certificate, sessionKey);
+                bool connected = proxy.Connect(encryptedSessionKey);
+
+                SessionKeyHelper.PrintSessionKey(sessionKey);
+
+                if (connected)
                 {
-                    string data;
-                    AES_CBC.EncryptData("MortalKombat,8080,TCP ", key, out data);
-                    Console.WriteLine(data);
-                    proxy.StartNewService(data);
+                    //pokretanje servisa, slanje zahteva
+                    string encryptedData;
+                    //AES_CBC.EncryptData("MortalKombat,8080,TCP ", sessionKey, out encryptedData);
+                    //Console.WriteLine(encryptedData);
+                    //proxy.StartNewService(encryptedData);
                 }
             }
 

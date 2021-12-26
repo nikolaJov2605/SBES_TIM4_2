@@ -21,19 +21,22 @@ namespace Client
             factory = this.CreateChannel();
         }
 
-        public string Connect()
+        public bool Connect(byte[] encryptedSessionKey)
         {
+            bool connected = false;
             try
             {
-                return factory.Connect();
+                connected = factory.Connect(encryptedSessionKey);
+
             }catch(FaultException<SecurityException> sec)
             {
                 Console.WriteLine(sec.Message);
+
             }catch(Exception e)
             {
                 Console.WriteLine(e.Message);
             }
-            return string.Empty;
+            return connected;
         }
 
         public bool StartNewService(string encryptedMessage)
