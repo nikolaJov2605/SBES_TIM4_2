@@ -120,7 +120,10 @@
   <data name="Getter" xml:space="preserve">
     <value>HTTP:80,TCP</value>
   </data>
+  <data name="Modifiers" xml:space="preserve">
+    <value>TCP:2900,HTTP</value>
+  </data>
   <data name="Runers" xml:space="preserve">
-    <value>TCP:4300,200</value>
+    <value>TCP:8080,UDP</value>
   </data>
 </root>

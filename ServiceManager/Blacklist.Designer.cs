@@ -70,7 +70,16 @@ namespace ServiceManager {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to TCP:4300,200.
+        ///   Looks up a localized string similar to TCP:2900,HTTP.
+        /// </summary>
+        internal static string Modifiers {
+            get {
+                return ResourceManager.GetString("Modifiers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to TCP:8080,UDP.
         /// </summary>
         internal static string Runers {
             get {
