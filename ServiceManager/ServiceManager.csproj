@@ -60,9 +60,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AuditManager\AuditManager.csproj">
+    <ProjectReference Include="..\AuditManager\CertHelper.csproj">
       <Project>{2494dece-bb40-46bd-ad68-ec97ee64597c}</Project>
-      <Name>AuditManager</Name>
+      <Name>CertHelper</Name>
     </ProjectReference>
     <ProjectReference Include="..\Contract\Contract.csproj">
       <Project>{7F08734C-5C6C-44B4-832B-A9975A0CA317}</Project>

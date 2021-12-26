@@ -7,25 +7,41 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Permissions;
+using System.Security.Principal;
 using System.ServiceModel;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Formatter = Manage.Formatter;
 
 namespace ServiceManager
 {
     public class ServiceManagerImplementation : IServiceManager
     {
-        string keyForStart = null;
+        Dictionary<string, byte[]> UsersSessionKeys = new Dictionary<string, byte[]>();
 
-        //Implementacija Servisa koji vraca kljuc i na nalog klijenta podize obicne servise :D
-        [PrincipalPermission(SecurityAction.Demand,Role = "ExchangeSessionKey")]
-        public string Connect()
+        //[PrincipalPermission(SecurityAction.Demand,Role = "ExchangeSessionKey")]
+        public bool Connect(byte[] encryptedSessionKey)
         {
-            //samo radi probe povezujemo samo RBAC i  kriptovanje danas za pocetak
-            SymmetricAlgorithm syim = AesCryptoServiceProvider.Create();
-            keyForStart = syim.Key.ToString();
-            return ASCIIEncoding.ASCII.GetString(syim.Key);
+            //string serviceCert = Formatter.ParseName(WindowsIdentity.GetCurrent().Name);
+            //Console.WriteLine(serviceCert);
+            string serviceCert = "Manager";
+
+            CustomPrincipal principal = Thread.CurrentPrincipal as CustomPrincipal;
+            string userName = Formatter.ParseName(principal.Identity.Name);
+
+            //pronaci sertifikat i uzeti ga iz skladista
+            X509Certificate2 certificate = CertManager.GetCertificateFromStorage(StoreName.My, StoreLocation.LocalMachine, serviceCert);
+
+            //treba dekriptovati kljuc sa privatnim kljucem servisa
+            byte[] sessionKey = SessionKeyHelper.DecryptSessionKey(certificate, encryptedSessionKey);
+
+            SessionKeyHelper.PrintSessionKey(sessionKey);
+
+            //ovde se sacuvava kljuc koji je klijent generisao i poslao
+            UsersSessionKeys[userName] = sessionKey;
+
+            return true;
         }
 
         //[PrincipalPermission(SecurityAction.Demand, Role = "RunService")]
@@ -34,10 +50,11 @@ namespace ServiceManager
             CustomPrincipal principal = Thread.CurrentPrincipal as CustomPrincipal;
             string userName = Manage.Formatter.ParseName(principal.Identity.Name);
 
-            if(Thread.CurrentPrincipal.IsInRole("RunService"))
+            if (Thread.CurrentPrincipal.IsInRole("RunService"))
             {
                 string data;
-                AES_CBC.DecryptData(encryptedMessage, keyForStart, out data);
+                //treba da se salje niz bajtova
+                AES_CBC.DecryptData(encryptedMessage, UsersSessionKeys[userName], out data);
                 Console.WriteLine(data);
 
                 try

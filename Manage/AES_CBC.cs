@@ -10,12 +10,12 @@ namespace Manage
 {
     public class AES_CBC
     {
-        public static void EncryptData(string message,string key,out string encryptMessage)
+        public static void EncryptData(string message,byte[] key,out string encryptMessage)
         {
             //Pravimo provajdera koji ce sadrzati kako se kriptuje
             AesCryptoServiceProvider aesCriptograph = new AesCryptoServiceProvider()
             {
-                Key = ASCIIEncoding.ASCII.GetBytes(key),
+                Key = key,
                 Padding = PaddingMode.None,
                 Mode = CipherMode.CBC
             };
@@ -32,12 +32,12 @@ namespace Manage
             }
         }
 
-        public static void DecryptData(string encryptedMessage , string key , out string plainText)
+        public static void DecryptData(string encryptedMessage , byte[] key , out string plainText)
         {
             //Pravimo provajdera koji ce sadrzati kako se kriptuje
             AesCryptoServiceProvider aesCriptograph = new AesCryptoServiceProvider()
             {
-                Key = ASCIIEncoding.ASCII.GetBytes(key),
+                Key = key,
                 Padding = PaddingMode.None,
                 Mode = CipherMode.CBC
             };
