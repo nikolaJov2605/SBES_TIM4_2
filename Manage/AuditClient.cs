@@ -1,4 +1,4 @@
-﻿using AuditManager;
+﻿using CertHelper;
 using Contract;
 using Manage;
 using System;
@@ -96,6 +96,18 @@ namespace Manage
             catch (Exception e)
             {
                 Console.WriteLine("[LogAuthorizationSuccess] ERROR = {0}", e.Message);
+            }
+        }
+
+        public void LogAuthenticationSuccess(string username)
+        {
+            try
+            {
+                factory.LogAuthenticationSuccess(username);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("[LogAuthenticationSuccess] ERROR = {0}", e.Message);
             }
         }
     }

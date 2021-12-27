@@ -7,7 +7,8 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using Contract;
-using AuditManager;
+using CertHelper;
+using System.ServiceModel.Description;
 
 namespace Audit
 {

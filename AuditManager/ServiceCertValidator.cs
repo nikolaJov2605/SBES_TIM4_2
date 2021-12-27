@@ -7,7 +7,7 @@ using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AuditManager
+namespace CertHelper
 {
     public class ServiceCertValidator : X509CertificateValidator
     {

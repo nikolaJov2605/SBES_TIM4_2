@@ -14,6 +14,12 @@ namespace Contract
         void TestCommunication();
 
         [OperationContract]
+        void LogAuthenticationSuccess(string username);
+
+        [OperationContract]
+        void LogAuthorizationSuccess(string username, string serviceName);
+
+        [OperationContract]
         void LogAuthorizationFailed(string username, string serviceName, string reason);
 
         [OperationContract]
@@ -21,8 +27,5 @@ namespace Contract
 
         [OperationContract]
         void LogServiceStartDenied();
-
-        [OperationContract]
-        void LogAuthorizationSuccess(string username, string serviceName);
     }
 }

@@ -1,9 +1,12 @@
-﻿using System;
+﻿using CertHelper;
+using System;
 using System.Collections.Generic;
 using System.IdentityModel.Claims;
 using System.IdentityModel.Policy;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
+using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -40,9 +43,31 @@ namespace Manage
             {
                 return false;
             }
+
+            WindowsIdentity windowsIdentity = identities[0] as WindowsIdentity;
+
+            try
+            {
+                NetTcpBinding binding = new NetTcpBinding();
+                binding.Security.Transport.ClientCredentialType = TcpClientCredentialType.Certificate;
+
+                /// Use CertManager class to obtain the certificate based on the "srvCertCN" representing the expected service identity.
+                X509Certificate2 srvCert = CertManager.GetCertificateFromStorage(StoreName.TrustedPeople, StoreLocation.LocalMachine, "Auditer");
+                EndpointAddress addressAudit = new EndpointAddress(new Uri("net.tcp://localhost:9999/Audit"),
+                                          new X509CertificateEndpointIdentity(srvCert));
+                using (AuditClient proxy = new AuditClient(binding, addressAudit))
+                {
+                    //proxy.LogAuthenticationSuccess(Formatter.ParseName(windowsIdentity.Name));
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
             //ako je sve uredu onda kreiramo u recniku novu vrednost koja ce biti nas custom principall kao principal
             //customPrincipal mozemo kastovati iz Iidentity u WindowsIdentity jer win poseduje iidenty pa zna kako da popuni polja
-            evaluationContext.Properties["Principal"] = new CustomPrincipal((WindowsIdentity)identities[0]);
+            evaluationContext.Properties["Principal"] = new CustomPrincipal(windowsIdentity);
             return true;
         }
     }

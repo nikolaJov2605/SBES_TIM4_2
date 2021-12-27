@@ -1,4 +1,4 @@
-﻿using AuditManager;
+﻿using CertHelper;
 using Contract;
 using Manage;
 using System;
@@ -23,12 +23,55 @@ namespace ServiceManager
         //[PrincipalPermission(SecurityAction.Demand,Role = "ExchangeSessionKey")]
         public bool Connect(byte[] encryptedSessionKey)
         {
+            CustomPrincipal principal = Thread.CurrentPrincipal as CustomPrincipal;
+            string userName = Formatter.ParseName(principal.Identity.Name);
+
+            if (Thread.CurrentPrincipal.IsInRole("ExchangeSessionKey"))
+            {
+                try
+                {
+                    NetTcpBinding binding = new NetTcpBinding();
+                    binding.Security.Transport.ClientCredentialType = TcpClientCredentialType.Certificate;
+
+                    /// Use CertManager class to obtain the certificate based on the "srvCertCN" representing the expected service identity.
+                    X509Certificate2 srvCert = CertManager.GetCertificateFromStorage(StoreName.TrustedPeople, StoreLocation.LocalMachine, "Auditer");
+                    EndpointAddress addressAudit = new EndpointAddress(new Uri("net.tcp://localhost:9999/Audit"),
+                                              new X509CertificateEndpointIdentity(srvCert));
+                    using (AuditClient proxy = new AuditClient(binding, addressAudit))
+                    {
+                        proxy.LogAuthorizationSuccess(userName, OperationContext.Current.IncomingMessageHeaders.Action);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+            }
+            else
+            {
+                try
+                {
+                    NetTcpBinding binding = new NetTcpBinding();
+                    binding.Security.Transport.ClientCredentialType = TcpClientCredentialType.Certificate;
+
+                    /// Use CertManager class to obtain the certificate based on the "srvCertCN" representing the expected service identity.
+                    X509Certificate2 srvCert = CertManager.GetCertificateFromStorage(StoreName.TrustedPeople, StoreLocation.LocalMachine, "Auditer");
+                    EndpointAddress addressAudit = new EndpointAddress(new Uri("net.tcp://localhost:9999/Audit"),
+                                              new X509CertificateEndpointIdentity(srvCert));
+                    using (AuditClient proxy = new AuditClient(binding, addressAudit))
+                    {
+                        proxy.LogAuthorizationFailed(userName, OperationContext.Current.IncomingMessageHeaders.Action, "Connect need ExchangeSessionKey permission");
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+            }
+
             //string serviceCert = Formatter.ParseName(WindowsIdentity.GetCurrent().Name);
             //Console.WriteLine(serviceCert);
             string serviceCert = "Manager";
-
-            CustomPrincipal principal = Thread.CurrentPrincipal as CustomPrincipal;
-            string userName = Formatter.ParseName(principal.Identity.Name);
 
             //pronaci sertifikat i uzeti ga iz skladista
             X509Certificate2 certificate = CertManager.GetCertificateFromStorage(StoreName.My, StoreLocation.LocalMachine, serviceCert);

@@ -121,6 +121,6 @@
     <value>ExchangeSessionKey</value>
   </data>
   <data name="Runers" xml:space="preserve">
-    <value>ExchangeSessionKey, RunService</value>
+    <value>ExchangeSessionKey,RunService</value>
   </data>
 </root>

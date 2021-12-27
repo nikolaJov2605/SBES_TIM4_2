@@ -9,6 +9,18 @@ namespace Audit
 {
     public class AuditService : IAuditContract
     {
+        public void LogAuthenticationSuccess(string username)
+        {
+            try
+            {
+                Audit.AuthenticationSuccess(username);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+
         public void LogAuthorizationFailed(string username, string serviceName, string reason)
         {
             try
