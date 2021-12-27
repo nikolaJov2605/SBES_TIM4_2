@@ -39,7 +39,7 @@ namespace Client
             return connected;
         }
 
-        public bool StartNewService(string encryptedMessage)
+        public bool StartNewService(byte[] encryptedMessage)
         {
             try
             {

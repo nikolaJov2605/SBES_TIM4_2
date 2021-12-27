@@ -16,7 +16,7 @@ namespace Contract
 
         [OperationContract]
         [FaultContract(typeof(SecurityException))]
-        bool StartNewService(string encryptedMessage);
+        bool StartNewService(byte[] encryptedMessage);
 
     }
 }

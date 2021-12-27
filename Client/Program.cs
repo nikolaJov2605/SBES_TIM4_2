@@ -35,6 +35,7 @@ namespace Client
                 X509Certificate2 certificate = CertManager.GetCertificateFromStorage(StoreName.TrustedPeople, StoreLocation.LocalMachine, serviceCert);
 
                 byte[] encryptedSessionKey = SessionKeyHelper.EncryptSessionKey(certificate, sessionKey);
+
                 bool connected = proxy.Connect(encryptedSessionKey);
 
                 SessionKeyHelper.PrintSessionKey(sessionKey);
@@ -42,10 +43,9 @@ namespace Client
                 if (connected)
                 {
                     //pokretanje servisa, slanje zahteva
-                    string encryptedData;
-                    //AES_CBC.EncryptData("MortalKombat,8080,TCP ", sessionKey, out encryptedData);
-                    //Console.WriteLine(encryptedData);
-                    //proxy.StartNewService(encryptedData);
+                    byte[] encryptedData = AES_CBC.EncryptData("MortalKombat,8080,TCP", sessionKey);
+                    Console.WriteLine(Encoding.ASCII.GetString(encryptedData));
+                    proxy.StartNewService(encryptedData);
                 }
             }
 

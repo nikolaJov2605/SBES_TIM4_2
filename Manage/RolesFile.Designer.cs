@@ -70,7 +70,7 @@ namespace Manage {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ExchangeSessionKey,RunService.
+        ///   Looks up a localized string similar to ExchangeSessionKey, RunService.
         /// </summary>
         internal static string Runers {
             get {

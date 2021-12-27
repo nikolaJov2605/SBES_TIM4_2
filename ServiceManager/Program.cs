@@ -64,11 +64,11 @@ namespace ServiceManager
             EndpointAddress addressAudit = new EndpointAddress(new Uri("net.tcp://localhost:9999/Audit"),
                                       new X509CertificateEndpointIdentity(srvCert));
 
-            using (AuditClient proxy = new AuditClient(binding, addressAudit))
-            {
-                /// 1. Communication test
-                proxy.TestCommunication();
-            }
+            //using (AuditClient proxy = new AuditClient(binding, addressAudit))
+            //{
+            //    /// 1. Communication test
+            //    proxy.TestCommunication();
+            //}
             Console.ReadLine();
         }
     }
