@@ -3,6 +3,8 @@ using Contract;
 using Manage;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -134,10 +136,21 @@ namespace ServiceManager
 
             }
 
-
             //nakon provere black liste
             string reason = string.Empty;
-            bool canRun = BlacklistManager.Instance().PermissionGranted(groups,protocol,portNumber, out reason);
+            bool canRun = BlacklistManager.Instance().PermissionGranted(groups, protocol, portNumber, out reason);
+
+            if (canRun)
+            {
+                //string filepath = @"..\..\..\ClientsService\bin\Debug";
+                string curentPath = AppContext.BaseDirectory;
+                string curentPathB = curentPath.Remove(curentPath.Length - 26);
+                string path = curentPathB + "\\ClientsService\\bin\\Debug\\ClientsService.exe";
+                StartClientService(protocol, portNumber, path);
+                //using (windowsIdentity.Impersonate())
+                //{
+                //}
+            }
             
             try
             {
@@ -219,6 +232,27 @@ namespace ServiceManager
             //    throw new FaultException("User " + userName +
             //        " tried to start service without RunService role.");
             //}
+        }
+
+        private void StartClientService(string protokol, int port, string path)
+        {
+            if((protokol == null || protokol == "") || (port < 1024 || port > 65535))
+            {
+                Console.WriteLine("Bad arguments.");
+                return;
+            }
+
+            try
+            { 
+                String param = protokol + " " + port.ToString();
+                Process.Start(path, param);
+
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine("Start Service Failed: {0}", ex.Message);
+            }
+
         }
     }
 }
