@@ -75,11 +75,11 @@ namespace Manage
             }
         }
 
-        public void LogServiceStartDenied()
+        public void LogServiceStartDenied(string username, string protocol, string port, string reason)
         {
             try
             {
-                factory.LogServiceStartDenied();
+                factory.LogServiceStartDenied(username, protocol, port, reason);
             }
             catch (Exception e)
             {
@@ -108,6 +108,18 @@ namespace Manage
             catch (Exception e)
             {
                 Console.WriteLine("[LogAuthenticationSuccess] ERROR = {0}", e.Message);
+            }
+        }
+
+        public void BlacklistFaultedState()
+        {
+            try
+            {
+                factory.BlacklistFaultedState();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("[BlacklistFaultedState] ERROR = {0}", e.Message);
             }
         }
     }

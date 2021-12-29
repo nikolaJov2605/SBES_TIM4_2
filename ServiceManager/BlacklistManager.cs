@@ -74,10 +74,11 @@ namespace ServiceManager
 
 
 
-        public bool PermissionGranted(string[] groups, string protocol, int port)
+        public bool PermissionGranted(string[] groups, string protocol, int port, out string reason)
         {
             string[] pairs, concretePair;
             string pairsStr, pr, por;
+            reason = "";
 
 
             // prodji kroz sve grupe kojima korisnik pripada
@@ -95,12 +96,18 @@ namespace ServiceManager
                         if (isNumber)   // ako se u konfiguraciji nalazi samo port, poredimo ga sa onim koji je prosledjen i odlucujemo odobravamo li pristup ili ne
                         {
                             if (port == portNum)
+                            {
+                                reason = "PORT";
                                 return false;
+                            }
                         }
                         else            // u suprotnom, ako je u konfiguraciji samo protokol, poredimo ga sa prosledjenim protokolom
                         {
                             if (pair.ToUpper() == protocol.ToUpper())
+                            {
+                                reason = "PROTOCOL";
                                 return false;
+                            }
                         }
                     }
                     else
@@ -110,6 +117,7 @@ namespace ServiceManager
                         por = concretePair[1];
                         if (protocol.ToUpper() == pr.ToUpper() && port.ToString() == por)
                         {
+                            reason = "PROTOCOL+PORT";
                             return false;
                         }
                     }

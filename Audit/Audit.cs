@@ -90,13 +90,22 @@ namespace Audit
             }
         }
 
-        public static void ServiceStartDenied()
+        public static void ServiceStartDenied(string userName, string protocol, string port)
         {
             if (customLog != null)
             {
                 string ServiceStartDenied = AuditEvents.ServiceStartDenied;
-                string message = String.Format(ServiceStartDenied);
-                customLog.WriteEntry(message);
+
+                string messagePart = string.Empty;
+                if (!protocol.Equals(string.Empty) && !port.Equals(string.Empty))
+                    messagePart = String.Format("with protocol:{0} on port:{1}", protocol, port);
+                else if(!protocol.Equals(string.Empty))
+                    messagePart = String.Format("with protocol:{0}", protocol);
+                else if(!port.Equals(string.Empty))
+                    messagePart = String.Format("on port:{0}", port);
+
+                string message = String.Format(ServiceStartDenied, userName, messagePart);
+                customLog.WriteEntry(message, EventLogEntryType.Warning);
             }
             else
             {
@@ -111,12 +120,26 @@ namespace Audit
             {
                 string DoSAttackDetected = AuditEvents.DoSAttackDetected;
                 string message = String.Format(DoSAttackDetected, userName);
-                customLog.WriteEntry(message);
+                customLog.WriteEntry(message, EventLogEntryType.Error);
             }
             else
             {
                 throw new ArgumentException(string.Format("Error while trying to write event (eventid = {0}) to event log.",
                                             (int)AuditEventTypes.DoSAttackDetected));
+            }
+        }
+
+        public static void BlacklistFaultedState()
+        {
+            if (customLog != null)
+            {
+                string BlacklistFaultedState = AuditEvents.BlacklistFaultedState;
+                customLog.WriteEntry(BlacklistFaultedState, EventLogEntryType.Error);
+            }
+            else
+            {
+                throw new ArgumentException(string.Format("Error while trying to write event (eventid = {0}) to event log.",
+                                            (int)AuditEventTypes.BlacklistFaultedState));
             }
         }
 

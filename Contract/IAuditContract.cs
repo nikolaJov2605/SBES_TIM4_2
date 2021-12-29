@@ -26,6 +26,9 @@ namespace Contract
         void LogServiceStarted(string username);
 
         [OperationContract]
-        void LogServiceStartDenied();
+        void LogServiceStartDenied(string username, string protocol, string port, string reason);
+
+        [OperationContract]
+        void BlacklistFaultedState();
     }
 }

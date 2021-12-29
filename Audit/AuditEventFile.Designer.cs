@@ -88,6 +88,15 @@ namespace Audit {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Blacklist configuration in faulted state. Service Manager shut itself down..
+        /// </summary>
+        internal static string BlacklistFaultedState {
+            get {
+                return ResourceManager.GetString("BlacklistFaultedState", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to DoS attack by user {0} detected..
         /// </summary>
         internal static string DoSAttackDetected {
@@ -97,7 +106,7 @@ namespace Audit {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Service start denied..
+        ///   Looks up a localized string similar to Service start requested by user {0} {1} denied..
         /// </summary>
         internal static string ServiceStartDenied {
             get {
