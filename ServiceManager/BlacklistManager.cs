@@ -71,9 +71,6 @@ namespace ServiceManager
             return false;
         }
 
-
-
-
         public bool PermissionGranted(string[] groups, string protocol, int port, out string reason)
         {
             string[] pairs, concretePair;

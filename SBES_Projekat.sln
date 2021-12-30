@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CertHelper", "AuditManager\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientsService", "ClientsService\ClientsService.csproj", "{45F86B35-E3BF-43E9-B7D4-EA23110AD790}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{362D272C-C638-4D5F-9B37-26D322A4ACA1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{45F86B35-E3BF-43E9-B7D4-EA23110AD790}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{45F86B35-E3BF-43E9-B7D4-EA23110AD790}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{45F86B35-E3BF-43E9-B7D4-EA23110AD790}.Release|Any CPU.Build.0 = Release|Any CPU
+		{362D272C-C638-4D5F-9B37-26D322A4ACA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{362D272C-C638-4D5F-9B37-26D322A4ACA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{362D272C-C638-4D5F-9B37-26D322A4ACA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{362D272C-C638-4D5F-9B37-26D322A4ACA1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

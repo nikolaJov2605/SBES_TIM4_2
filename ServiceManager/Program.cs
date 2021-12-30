@@ -30,7 +30,7 @@ namespace ServiceManager
             ServiceHost host = new ServiceHost(typeof(ServiceManagerImplementation));
             host.AddServiceEndpoint(typeof(IServiceManager), binding, address);
 
-            
+
             host.Authorization.ServiceAuthorizationManager = new CustomAuthorizationManager();
 
             // TO DO : podesesiti custom polisu, odnosno nas objekat principala           
@@ -54,6 +54,9 @@ namespace ServiceManager
             Console.WriteLine(WindowsIdentity.GetCurrent().Name);
             Console.WriteLine("Server is successfully opened");
 
+            Thread th = new Thread(() => ServiceManagerImplementation.CheckSumFunction());
+            th.Start();
+
             string srvCertCN = "Auditer";
 
             binding = new NetTcpBinding();
@@ -64,11 +67,12 @@ namespace ServiceManager
             EndpointAddress addressAudit = new EndpointAddress(new Uri("net.tcp://localhost:9999/Audit"),
                                       new X509CertificateEndpointIdentity(srvCert));
 
-            //using (AuditClient proxy = new AuditClient(binding, addressAudit))
-            //{
-            //    /// 1. Communication test
-            //    proxy.TestCommunication();
-            //}
+            using (AuditClient proxy = new AuditClient(binding, addressAudit))
+            {
+                /// 1. Communication test
+                proxy.TestCommunication();
+            }
+
             Console.ReadLine();
         }
     }

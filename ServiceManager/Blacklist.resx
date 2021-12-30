@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Getter" xml:space="preserve">
-    <value>HTTP:80,TCP</value>
+    <value>HTTP:80,UDP</value>
   </data>
   <data name="Modifiers" xml:space="preserve">
     <value>TCP:2900,HTTP</value>

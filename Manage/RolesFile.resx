@@ -120,6 +120,9 @@
   <data name="Getter" xml:space="preserve">
     <value>ExchangeSessionKey</value>
   </data>
+  <data name="Modifiers" xml:space="preserve">
+    <value>ExchangeSessionKey,RunService,Modify</value>
+  </data>
   <data name="Runers" xml:space="preserve">
     <value>ExchangeSessionKey,RunService</value>
   </data>

@@ -21,8 +21,8 @@ namespace ServiceManager
     public class ServiceManagerImplementation : IServiceManager
     {
         Dictionary<string, byte[]> UsersSessionKeys = new Dictionary<string, byte[]>();
+        static BlacklistManager BLM = BlacklistManager.Instance();
 
-        //[PrincipalPermission(SecurityAction.Demand,Role = "ExchangeSessionKey")]
         public bool Connect(byte[] encryptedSessionKey)
         {
             CustomPrincipal principal = Thread.CurrentPrincipal as CustomPrincipal;
@@ -35,7 +35,6 @@ namespace ServiceManager
                     NetTcpBinding binding = new NetTcpBinding();
                     binding.Security.Transport.ClientCredentialType = TcpClientCredentialType.Certificate;
 
-                    /// Use CertManager class to obtain the certificate based on the "srvCertCN" representing the expected service identity.
                     X509Certificate2 srvCert = CertManager.GetCertificateFromStorage(StoreName.TrustedPeople, StoreLocation.LocalMachine, "Auditer");
                     EndpointAddress addressAudit = new EndpointAddress(new Uri("net.tcp://localhost:9999/Audit"),
                                               new X509CertificateEndpointIdentity(srvCert));
@@ -56,7 +55,6 @@ namespace ServiceManager
                     NetTcpBinding binding = new NetTcpBinding();
                     binding.Security.Transport.ClientCredentialType = TcpClientCredentialType.Certificate;
 
-                    /// Use CertManager class to obtain the certificate based on the "srvCertCN" representing the expected service identity.
                     X509Certificate2 srvCert = CertManager.GetCertificateFromStorage(StoreName.TrustedPeople, StoreLocation.LocalMachine, "Auditer");
                     EndpointAddress addressAudit = new EndpointAddress(new Uri("net.tcp://localhost:9999/Audit"),
                                               new X509CertificateEndpointIdentity(srvCert));
@@ -75,15 +73,11 @@ namespace ServiceManager
             //Console.WriteLine(serviceCert);
             string serviceCert = "Manager";
 
-            //pronaci sertifikat i uzeti ga iz skladista
             X509Certificate2 certificate = CertManager.GetCertificateFromStorage(StoreName.My, StoreLocation.LocalMachine, serviceCert);
-
-            //treba dekriptovati kljuc sa privatnim kljucem servisa
             byte[] sessionKey = SessionKeyHelper.DecryptSessionKey(certificate, encryptedSessionKey);
 
-            SessionKeyHelper.PrintSessionKey(sessionKey);
+            //SessionKeyHelper.PrintSessionKey(sessionKey);
 
-            //ovde se sacuvava kljuc koji je klijent generisao i poslao
             UsersSessionKeys[userName] = sessionKey;
 
             return true;
@@ -142,14 +136,12 @@ namespace ServiceManager
 
             if (canRun)
             {
-                //string filepath = @"..\..\..\ClientsService\bin\Debug";
-                string curentPath = AppContext.BaseDirectory;
-                string curentPathB = curentPath.Remove(curentPath.Length - 26);
-                string path = curentPathB + "\\ClientsService\\bin\\Debug\\ClientsService.exe";
-                StartClientService(protocol, portNumber, path);
+                //ERROR: either a required impersonation level was not provided, or the provided impersonation level is invalid
                 //using (windowsIdentity.Impersonate())
                 //{
+                //    StartClientService(protocol, portNumber);
                 //}
+                StartClientService(protocol, portNumber);
             }
             
             try
@@ -180,72 +172,85 @@ namespace ServiceManager
             }
 
             return true;
-            //Thread.CurrentPrincipal.IsInRole("PERMISION") se koristi samo kada se proverava bazna perisija kao sto je npr read ili kod nas ExchangeSessionKey 
-            //i to samo u CheckAccessCore funkciji
-            
-            //if (Thread.CurrentPrincipal.IsInRole("RunService"))
-            //{
-            //    try
-            //    {
-            //        //Audit.Audit.ServiceStarted(userName);
-            //        NetTcpBinding binding = new NetTcpBinding();
-            //        binding.Security.Transport.ClientCredentialType = TcpClientCredentialType.Certificate;
-
-            //        /// Use CertManager class to obtain the certificate based on the "srvCertCN" representing the expected service identity.
-            //        X509Certificate2 srvCert = CertManager.GetCertificateFromStorage(StoreName.TrustedPeople, StoreLocation.LocalMachine, "Auditer");
-            //        EndpointAddress addressAudit = new EndpointAddress(new Uri("net.tcp://localhost:9999/Audit"),
-            //                                  new X509CertificateEndpointIdentity(srvCert));
-            //        using (AuditClient proxy = new AuditClient(binding, addressAudit))
-            //        {
-            //            proxy.LogAuthorizationSuccess(userName, OperationContext.Current.IncomingMessageHeaders.Action);
-            //            proxy.LogServiceStarted(userName);
-            //        }
-            //    }
-            //    catch (Exception e)
-            //    {
-            //        Console.WriteLine(e.Message);
-            //    }
-            //}
-            //else
-            //{
-            //    try
-            //    {
-            //        //Audit.Audit.ServiceStartDenied();
-            //        NetTcpBinding binding = new NetTcpBinding();
-            //        binding.Security.Transport.ClientCredentialType = TcpClientCredentialType.Certificate;
-
-            //        /// Use CertManager class to obtain the certificate based on the "srvCertCN" representing the expected service identity.
-            //        X509Certificate2 srvCert = CertManager.GetCertificateFromStorage(StoreName.TrustedPeople, StoreLocation.LocalMachine, "Auditer");
-            //        EndpointAddress addressAudit = new EndpointAddress(new Uri("net.tcp://localhost:9999/Audit"),
-            //                                  new X509CertificateEndpointIdentity(srvCert));
-            //        using (AuditClient proxy = new AuditClient(binding, addressAudit))
-            //        {
-            //            proxy.LogAuthorizationFailed(userName, OperationContext.Current.IncomingMessageHeaders.Action, "StartNewService need RunService permission");
-            //            proxy.LogServiceStartDenied();
-            //        }
-            //    }
-            //    catch (Exception e)
-            //    {
-            //        Console.WriteLine(e.Message);
-            //    }
-
-            //    throw new FaultException("User " + userName +
-            //        " tried to start service without RunService role.");
-            //}
         }
 
-        private void StartClientService(string protokol, int port, string path)
+        [PrincipalPermission(SecurityAction.Demand, Role = "Modifiers")]
+        public void RemoveRule(string group, string protocol = "", int port = -1)
         {
-            if((protokol == null || protokol == "") || (port < 1024 || port > 65535))
+            if (protocol != "" && port != -1)
+                BLM.RemoveRule(group, protocol, port);
+            else if (protocol == "" && port != -1)
+                BLM.RemoveRule(group, port);
+            else if (protocol != "" && port == -1)
+                BLM.RemoveRule(group, protocol);
+        }
+
+        [PrincipalPermission(SecurityAction.Demand, Role = "Modifiers")]
+        public void AddRule(string group, string protocol = "", int port = -1)
+        {
+            if (protocol != "" && port != -1)
+                BLM.AddRule(group, protocol, port);
+            else if (protocol == "" && port != -1)
+                BLM.AddRule(group, port);
+            else if (protocol != "" && port == -1)
+                BLM.AddRule(group, protocol);
+        }
+
+        public static void CheckSumFunction()
+        { 
+            while (true)
+            {
+                bool isFileValid = BLM.FileHashValid();
+
+                if (!isFileValid)
+                {
+                    NetTcpBinding binding = new NetTcpBinding();
+                    binding.Security.Transport.ClientCredentialType = TcpClientCredentialType.Certificate;
+
+                    /// Use CertManager class to obtain the certificate based on the "srvCertCN" representing the expected service identity.
+                    X509Certificate2 srvCert = CertManager.GetCertificateFromStorage(StoreName.TrustedPeople, StoreLocation.LocalMachine, "Auditer");
+                    EndpointAddress addressAudit = new EndpointAddress(new Uri("net.tcp://localhost:9999/Audit"),
+                                              new X509CertificateEndpointIdentity(srvCert));
+                    using (AuditClient proxy = new AuditClient(binding, addressAudit))
+                    {
+                        proxy.BlacklistFaultedState();
+                    }
+
+                    break;
+                }
+
+                Thread.Sleep(10000);
+            }
+
+            Console.WriteLine("SM is shuting down...");
+            Environment.Exit(0);
+        }
+
+        private void StartClientService(string protocol, int port)
+        {
+            if((protocol == null || protocol == "") || (port < 1024 || port > 65535))
             {
                 Console.WriteLine("Bad arguments.");
                 return;
             }
 
+            string curentPath = AppContext.BaseDirectory;
+            string curentPathB = curentPath.Remove(curentPath.Length - 26);
+            string filepath = curentPathB + "\\ClientsService\\bin\\Debug\\ClientsService.exe";
+            String param = protocol + " " + port.ToString();
+
+            //Process process = new Process();
+            //process.StartInfo.WorkingDirectory = filepath;
+            //process.StartInfo.FileName = "ClientsService.exe ";
+            //process.StartInfo.Arguments = param;
+            //process.StartInfo.Password = new System.Security.SecureString();
+            //process.StartInfo.UseShellExecute = false;
+            //process.StartInfo.RedirectStandardOutput = true;
+
             try
-            { 
-                String param = protokol + " " + port.ToString();
-                Process.Start(path, param);
+            {
+                Process.Start(filepath, param);
+                //process.Start();
 
             }
             catch(Exception ex)

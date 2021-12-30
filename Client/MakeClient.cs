@@ -56,6 +56,40 @@ namespace Client
             return false ;
         }
 
+        public void AddRule(string group, string protocol = "", int port = -1)
+        {
+            try
+            {
+                factory.AddRule(group, protocol, port);
+                return;
+            }
+            catch (FaultException<SecurityException> sec)
+            {
+                Console.WriteLine(sec.Message);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+
+        public void RemoveRule(string group, string protocol = "", int port = -1)
+        {
+            try
+            {
+                factory.RemoveRule(group, protocol, port);
+                return;
+            }
+            catch (FaultException<SecurityException> sec)
+            {
+                Console.WriteLine(sec.Message);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+
         public void Dispose()
         {
             if (factory != null)

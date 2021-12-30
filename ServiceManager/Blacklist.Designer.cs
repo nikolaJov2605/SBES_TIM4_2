@@ -61,7 +61,7 @@ namespace ServiceManager {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to HTTP:80,TCP.
+        ///   Looks up a localized string similar to HTTP:80,UDP.
         /// </summary>
         internal static string Getter {
             get {

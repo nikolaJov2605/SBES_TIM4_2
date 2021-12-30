@@ -21,7 +21,7 @@ namespace Audit
                 {
                     EventLog.CreateEventSource(SourceName, LogName);
                 }
-                customLog = new EventLog(LogName,Environment.MachineName, SourceName);
+                customLog = new EventLog(LogName, Environment.MachineName, SourceName);
             }
             catch (Exception e)
             {
