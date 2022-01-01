@@ -73,6 +73,20 @@ namespace ServiceManager
 
         public bool PermissionGranted(string[] groups, string protocol, int port, out string reason)
         {
+            if (!PortIsValid(port))
+            {
+                reason = "PORT";
+                return false;
+            }
+
+            string p = protocol.ToUpper();
+            if (!ProtocolSupported(p))
+            {
+                reason = "PROTOCOL";
+                return false;
+            }
+
+
             string[] pairs, concretePair;
             string pairsStr, pr, por;
             reason = "";
@@ -126,11 +140,39 @@ namespace ServiceManager
         }
 
 
+        private bool PortIsValid(int port)
+        {
+            if (port >= 1023 && port < UInt16.MaxValue)
+                return true;
+            else
+                return false;
+        }
+
+        private bool ProtocolSupported(string protocol)
+        {
+            if (protocol == "TCP" || protocol == "UDP" || protocol == "HTTP" || protocol == "POP3" || protocol == "SMTP" || protocol == "FTP" || protocol == "RHCP")
+                return true;
+            else
+                return false;
+        }
+
+
         #region ADD_RULE_METHODS
 
         // dodaje pravilo na osnovu dodeljene grupe, protokola i porta
         public void AddRule(string group, string protocol, int port)
         {
+            if (!PortIsValid(port))
+            {
+                return;
+            }
+
+            string p = protocol.ToUpper();
+            if (!ProtocolSupported(p))
+            {
+                return;
+            }
+
             SortedDictionary<string, string> retDic = new SortedDictionary<string, string>();
 
             string addedPair = protocol.ToUpper() + ":" + port;
@@ -172,6 +214,13 @@ namespace ServiceManager
         // ako dodajemo pravilo u vidu samo protokola, onda brisemo sva do tad postojeca pravila vezana za taj protokol
         public void AddRule(string group, string protocol)
         {
+            string p = protocol.ToUpper();
+            if (!ProtocolSupported(p))
+            {
+                return;
+            }
+
+
             SortedDictionary<string, string> retDic = new SortedDictionary<string, string>();
 
             string pairsStr = (string)Blacklist.ResourceManager.GetObject(group);
@@ -206,6 +255,12 @@ namespace ServiceManager
         // ako dodajemo pravilo u vidu samo porta, onda brisemo sva do tad postojeca pravila vezana za taj port
         public void AddRule(string group, int port)
         {
+            if (!PortIsValid(port))
+            {
+                return;
+            }
+
+
             SortedDictionary<string, string> retDic = new SortedDictionary<string, string>();
             List<string> toDelete = new List<string>();
 
@@ -273,6 +328,17 @@ namespace ServiceManager
         // Uklanjanje pravila vezanog za datu grupu u kontekstu protokola i porta
         public void RemoveRule(string group, string protocol, int port)
         {
+            if (!PortIsValid(port))
+            {
+                return;
+            }
+
+            string p = protocol.ToUpper();
+            if (!ProtocolSupported(p))
+            {
+                return;
+            }
+
             Dictionary<string, string> retDic = new Dictionary<string, string>();
 
             string toDelete = protocol.ToUpper() + ":" + port;
@@ -320,6 +386,12 @@ namespace ServiceManager
         // brisanje pravila vezanog za datu grupu u kontekstu protokola
         public void RemoveRule(string group, string protocol)
         {
+            string p = protocol.ToUpper();
+            if (!ProtocolSupported(p))
+            {
+                return;
+            }
+
             Dictionary<string, string> retDic = new Dictionary<string, string>();
 
 
@@ -366,6 +438,12 @@ namespace ServiceManager
         // brisanje pravila vezanog za datu grupu u kontekstu porta
         public void RemoveRule(string group, int port)
         {
+            if (!PortIsValid(port))
+            {
+                return;
+            }
+
+
             Dictionary<string, string> retDic = new Dictionary<string, string>();
 
 
