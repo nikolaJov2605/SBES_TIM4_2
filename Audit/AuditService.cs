@@ -172,5 +172,29 @@ namespace Audit
                 Console.WriteLine(e.Message);
             }
         }
+
+        public void BlacklistRuleAdded(string username, string group, string protocol, string port)
+        {
+            try
+            {
+                Audit.BlacklistRuleAdded(username, group, protocol, port);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+
+        public void BlacklistRuleRemoved(string username, string group, string protocol, string port)
+        {
+            try
+            {
+                Audit.BlacklistRuleRemoved(username, group, protocol, port);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
     }
 }

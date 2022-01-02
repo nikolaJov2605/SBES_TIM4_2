@@ -129,6 +129,12 @@
   <data name="BlacklistFaultedState" xml:space="preserve">
     <value>Blacklist configuration in faulted state. Service Manager shut itself down.</value>
   </data>
+  <data name="BlacklistRuleAdded" xml:space="preserve">
+    <value>User {0} added new rule for group:{1} {2}.</value>
+  </data>
+  <data name="BlacklistRuleRemoved" xml:space="preserve">
+    <value>User {0} removed rule for group:{1} {2}.</value>
+  </data>
   <data name="DoSAttackDetected" xml:space="preserve">
     <value>DoS attack by user {0} detected.</value>
   </data>

@@ -30,5 +30,11 @@ namespace Contract
 
         [OperationContract]
         void BlacklistFaultedState();
+
+        [OperationContract]
+        void BlacklistRuleAdded(string username, string group, string protocol, string port);
+
+        [OperationContract]
+        void BlacklistRuleRemoved(string username, string group, string protocol, string port);
     }
 }

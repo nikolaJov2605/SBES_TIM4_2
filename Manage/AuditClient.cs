@@ -16,6 +16,32 @@ namespace Manage
     {
         IAuditContract factory;
 
+        private static AuditClient _instance;
+        private static readonly object _lock = new object();
+
+        public static AuditClient Instance()
+        {
+            if(_instance == null)
+            {
+                lock (_lock)
+                {
+                    if (_instance == null)
+                    {
+                        NetTcpBinding binding = new NetTcpBinding();
+                        binding.Security.Transport.ClientCredentialType = TcpClientCredentialType.Certificate;
+
+                        /// Use CertManager class to obtain the certificate based on the "srvCertCN" representing the expected service identity.
+                        X509Certificate2 srvCert = CertManager.GetCertificateFromStorage(StoreName.TrustedPeople, StoreLocation.LocalMachine, "Auditer");
+                        EndpointAddress addressAudit = new EndpointAddress(new Uri("net.tcp://localhost:9999/Audit"),
+                                                  new X509CertificateEndpointIdentity(srvCert));
+                        _instance = new AuditClient(binding, addressAudit);
+                    }
+                }
+            }
+
+            return _instance;
+        }
+
         public AuditClient(NetTcpBinding binding, EndpointAddress address) : base(binding, address)
         {
             string managerCertCN = Formatter.ParseName(WindowsIdentity.GetCurrent().Name);
@@ -120,6 +146,30 @@ namespace Manage
             catch (Exception e)
             {
                 Console.WriteLine("[BlacklistFaultedState] ERROR = {0}", e.Message);
+            }
+        }
+
+        public void BlacklistRuleAdded(string username, string group, string protocol, string port)
+        {
+            try
+            {
+                factory.BlacklistRuleAdded(username, group, protocol, port);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("[BlacklistRuleAdded] ERROR = {0}", e.Message);
+            }
+        }
+
+        public void BlacklistRuleRemoved(string username, string group, string protocol, string port)
+        {
+            try
+            {
+                factory.BlacklistRuleRemoved(username, group, protocol, port);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("[BlacklistRuleRemoved] ERROR = {0}", e.Message);
             }
         }
     }

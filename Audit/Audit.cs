@@ -143,6 +143,54 @@ namespace Audit
             }
         }
 
+        public static void BlacklistRuleAdded(string userName, string group, string protocol, string port)
+        {
+            if (customLog != null)
+            {
+                string BlacklistRuleAdded = AuditEvents.BlacklistRuleAdded;
+
+                string messagePart = string.Empty;
+                if (!protocol.Equals(string.Empty) && !port.Equals(string.Empty))
+                    messagePart = String.Format("with protocol:{0} on port:{1}", protocol, port);
+                else if (!protocol.Equals(string.Empty))
+                    messagePart = String.Format("with protocol:{0}", protocol);
+                else if (!port.Equals(string.Empty))
+                    messagePart = String.Format("on port:{0}", port);
+
+                string message = String.Format(BlacklistRuleAdded, userName, group, messagePart);
+                customLog.WriteEntry(message, EventLogEntryType.Information);
+            }
+            else
+            {
+                throw new ArgumentException(string.Format("Error while trying to write event (eventid = {0}) to event log.",
+                                            (int)AuditEventTypes.ServiceStartDenied));
+            }
+        }
+
+        public static void BlacklistRuleRemoved(string userName, string group, string protocol, string port)
+        {
+            if (customLog != null)
+            {
+                string BlacklistRuleRemoved = AuditEvents.BlacklistRuleRemoved;
+
+                string messagePart = string.Empty;
+                if (!protocol.Equals(string.Empty) && !port.Equals(string.Empty))
+                    messagePart = String.Format("with protocol:{0} on port:{1}", protocol, port);
+                else if (!protocol.Equals(string.Empty))
+                    messagePart = String.Format("with protocol:{0}", protocol);
+                else if (!port.Equals(string.Empty))
+                    messagePart = String.Format("on port:{0}", port);
+
+                string message = String.Format(BlacklistRuleRemoved, userName, group, messagePart);
+                customLog.WriteEntry(message, EventLogEntryType.Information);
+            }
+            else
+            {
+                throw new ArgumentException(string.Format("Error while trying to write event (eventid = {0}) to event log.",
+                                            (int)AuditEventTypes.ServiceStartDenied));
+            }
+        }
+
         public void Dispose()
         {
             if (customLog != null)

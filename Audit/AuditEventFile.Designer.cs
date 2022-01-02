@@ -97,6 +97,24 @@ namespace Audit {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to User {0} added new rule for group:{1} {2}..
+        /// </summary>
+        internal static string BlacklistRuleAdded {
+            get {
+                return ResourceManager.GetString("BlacklistRuleAdded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User {0} removed rule for group:{1} {2}..
+        /// </summary>
+        internal static string BlacklistRuleRemoved {
+            get {
+                return ResourceManager.GetString("BlacklistRuleRemoved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to DoS attack by user {0} detected..
         /// </summary>
         internal static string DoSAttackDetected {

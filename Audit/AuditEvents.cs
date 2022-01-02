@@ -16,7 +16,9 @@ namespace Audit
         ServiceStarted = 3,
         ServiceStartDenied = 4,
         DoSAttackDetected = 5,
-        BlacklistFaultedState = 6
+        BlacklistFaultedState = 6,
+        BlacklistRuleAdded = 7,
+        BlacklistRuleRemoved = 8
     }
 
     public class AuditEvents
@@ -92,6 +94,22 @@ namespace Audit
             get
             {
                 return ResourceMgr.GetString(AuditEventTypes.BlacklistFaultedState.ToString());
+            }
+        }
+
+        public static string BlacklistRuleAdded
+        {
+            get
+            {
+                return ResourceMgr.GetString(AuditEventTypes.BlacklistRuleAdded.ToString());
+            }
+        }
+
+        public static string BlacklistRuleRemoved
+        {
+            get
+            {
+                return ResourceMgr.GetString(AuditEventTypes.BlacklistRuleRemoved.ToString());
             }
         }
     }

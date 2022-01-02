@@ -32,16 +32,7 @@ namespace ServiceManager
             {
                 try
                 {
-                    NetTcpBinding binding = new NetTcpBinding();
-                    binding.Security.Transport.ClientCredentialType = TcpClientCredentialType.Certificate;
-
-                    X509Certificate2 srvCert = CertManager.GetCertificateFromStorage(StoreName.TrustedPeople, StoreLocation.LocalMachine, "Auditer");
-                    EndpointAddress addressAudit = new EndpointAddress(new Uri("net.tcp://localhost:9999/Audit"),
-                                              new X509CertificateEndpointIdentity(srvCert));
-                    using (AuditClient proxy = new AuditClient(binding, addressAudit))
-                    {
-                        proxy.LogAuthorizationSuccess(userName, OperationContext.Current.IncomingMessageHeaders.Action);
-                    }
+                    AuditClient.Instance().LogAuthorizationSuccess(userName, OperationContext.Current.IncomingMessageHeaders.Action);
                 }
                 catch (Exception e)
                 {
@@ -51,17 +42,8 @@ namespace ServiceManager
             else
             {
                 try
-                {
-                    NetTcpBinding binding = new NetTcpBinding();
-                    binding.Security.Transport.ClientCredentialType = TcpClientCredentialType.Certificate;
-
-                    X509Certificate2 srvCert = CertManager.GetCertificateFromStorage(StoreName.TrustedPeople, StoreLocation.LocalMachine, "Auditer");
-                    EndpointAddress addressAudit = new EndpointAddress(new Uri("net.tcp://localhost:9999/Audit"),
-                                              new X509CertificateEndpointIdentity(srvCert));
-                    using (AuditClient proxy = new AuditClient(binding, addressAudit))
-                    {
-                        proxy.LogAuthorizationFailed(userName, OperationContext.Current.IncomingMessageHeaders.Action, "Connect need ExchangeSessionKey permission");
-                    }
+                { 
+                    AuditClient.Instance().LogAuthorizationFailed(userName, OperationContext.Current.IncomingMessageHeaders.Action, "Connect need ExchangeSessionKey permission");
                 }
                 catch (Exception e)
                 {
@@ -146,24 +128,13 @@ namespace ServiceManager
             
             try
             {
-                NetTcpBinding binding = new NetTcpBinding();
-                binding.Security.Transport.ClientCredentialType = TcpClientCredentialType.Certificate;
-
-                /// Use CertManager class to obtain the certificate based on the "srvCertCN" representing the expected service identity.
-                X509Certificate2 srvCert = CertManager.GetCertificateFromStorage(StoreName.TrustedPeople, StoreLocation.LocalMachine, "Auditer");
-                EndpointAddress addressAudit = new EndpointAddress(new Uri("net.tcp://localhost:9999/Audit"),
-                                               new X509CertificateEndpointIdentity(srvCert));
-
-                using (AuditClient proxy = new AuditClient(binding, addressAudit))
+                if (canRun)
                 {
-                    if (canRun)
-                    {
-                        proxy.LogServiceStarted(userName);
-                    }
-                    else
-                    {
-                        proxy.LogServiceStartDenied(userName, protocol, port, reason);
-                    }
+                    AuditClient.Instance().LogServiceStarted(userName);
+                }
+                else
+                {
+                    AuditClient.Instance().LogServiceStartDenied(userName, protocol, port, reason);
                 }
             }
             catch (Exception e)
@@ -174,26 +145,50 @@ namespace ServiceManager
             return true;
         }
 
-        [PrincipalPermission(SecurityAction.Demand, Role = "Modifiers")]
+        [PrincipalPermission(SecurityAction.Demand, Role = "Modify")]
         public void RemoveRule(string group, string protocol = "", int port = -1)
         {
+            CustomPrincipal principal = Thread.CurrentPrincipal as CustomPrincipal;
+            string userName = Manage.Formatter.ParseName(principal.Identity.Name);
+
             if (protocol != "" && port != -1)
                 BLM.RemoveRule(group, protocol, port);
             else if (protocol == "" && port != -1)
                 BLM.RemoveRule(group, port);
             else if (protocol != "" && port == -1)
                 BLM.RemoveRule(group, protocol);
+
+            try
+            {
+                AuditClient.Instance().BlacklistRuleRemoved(userName, group, protocol, (port == -1) ? "" : port.ToString());
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
 
-        [PrincipalPermission(SecurityAction.Demand, Role = "Modifiers")]
+        [PrincipalPermission(SecurityAction.Demand, Role = "Modify")]
         public void AddRule(string group, string protocol = "", int port = -1)
         {
+            CustomPrincipal principal = Thread.CurrentPrincipal as CustomPrincipal;
+            string userName = Manage.Formatter.ParseName(principal.Identity.Name);
+
             if (protocol != "" && port != -1)
                 BLM.AddRule(group, protocol, port);
             else if (protocol == "" && port != -1)
                 BLM.AddRule(group, port);
             else if (protocol != "" && port == -1)
                 BLM.AddRule(group, protocol);
+
+            try
+            {
+                AuditClient.Instance().BlacklistRuleAdded(userName, group, protocol, (port == -1) ? "" : port.ToString());
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
 
         public static void CheckSumFunction()
@@ -204,18 +199,7 @@ namespace ServiceManager
 
                 if (!isFileValid)
                 {
-                    NetTcpBinding binding = new NetTcpBinding();
-                    binding.Security.Transport.ClientCredentialType = TcpClientCredentialType.Certificate;
-
-                    /// Use CertManager class to obtain the certificate based on the "srvCertCN" representing the expected service identity.
-                    X509Certificate2 srvCert = CertManager.GetCertificateFromStorage(StoreName.TrustedPeople, StoreLocation.LocalMachine, "Auditer");
-                    EndpointAddress addressAudit = new EndpointAddress(new Uri("net.tcp://localhost:9999/Audit"),
-                                              new X509CertificateEndpointIdentity(srvCert));
-                    using (AuditClient proxy = new AuditClient(binding, addressAudit))
-                    {
-                        proxy.BlacklistFaultedState();
-                    }
-
+                    AuditClient.Instance().BlacklistFaultedState();
                     break;
                 }
 
