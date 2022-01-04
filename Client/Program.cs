@@ -8,6 +8,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 using System.ServiceModel;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -127,19 +128,22 @@ namespace Client
             string machineStr = "";
             string protocol = "";
             string port = "";
+            int portNum = -1;
 
             do
             {
                 Console.WriteLine("Input name of machine: ");
                 machineStr = Console.ReadLine().Trim();
-            } while (machineStr == "" || machineStr == null);
+            } while (machineStr == "" || machineStr == null || Regex.IsMatch(machineStr, @"^\d+"));
 
             while(true)
             {
                 Console.WriteLine("Input protocol: ");
                 protocol = Console.ReadLine();
                 ProtocolEnum.Protocols pe;
-                Enum.TryParse<ProtocolEnum.Protocols>(protocol.ToUpper(), out pe);
+                bool isConverted = Enum.TryParse<ProtocolEnum.Protocols>(protocol.ToUpper(), out pe);
+                if (!isConverted)
+                    continue;
                 if (Enum.IsDefined(typeof(ProtocolEnum.Protocols), pe))
                     break;
             }
@@ -148,11 +152,12 @@ namespace Client
             {
                 Console.WriteLine("Input port ");
                 port = Console.ReadLine();
-            } while (port == "" || port == null || Int32.Parse(port) > 65535 || Int32.Parse(port) < 1023);
+                bool isConverted = Int32.TryParse(port, out portNum);
+                if (!isConverted)
+                    continue;
+            } while (port == "" || port == null || portNum > 65535 || portNum < 1023);
 
             byte[] encryptedData = AES_CBC.EncryptData(string.Format("{0},{1},{2}", machineStr, protocol, port), sessionKey);
-
-            //Console.WriteLine(Encoding.ASCII.GetString(encryptedData));
 
             bool isStarted = proxy.StartNewService(encryptedData);
 
@@ -167,6 +172,7 @@ namespace Client
             string userGroup = "";
             string protocol = "";
             string port = "";
+            int portNum = -1;
 
             do
             {
@@ -179,7 +185,9 @@ namespace Client
                 Console.WriteLine("Input protocol: ");
                 protocol = Console.ReadLine();
                 ProtocolEnum.Protocols pe;
-                Enum.TryParse<ProtocolEnum.Protocols>(protocol.ToUpper(), out pe);
+                bool isConverted = Enum.TryParse<ProtocolEnum.Protocols>(protocol.ToUpper(), out pe);
+                if (!isConverted)
+                    continue;
                 if (Enum.IsDefined(typeof(ProtocolEnum.Protocols), pe))
                     break;
             }
@@ -188,9 +196,14 @@ namespace Client
             {
                 Console.WriteLine("Input port ");
                 port = Console.ReadLine();
-            } while (port == "" || port == null || Int32.Parse(port) > 65535 || Int32.Parse(port) < 1023);
+                if (port == "" && protocol != "")
+                    break;
+                bool isConverted = Int32.TryParse(port, out portNum);
+                if (!isConverted)
+                    continue;
+            } while (portNum > 65535 || portNum < 1023);
 
-            proxy.AddRule(userGroup, protocol, Int32.Parse(port));
+            proxy.AddRule(userGroup, protocol, portNum);
         }
 
         private static void ClientRemoveRule(MakeClient proxy)
@@ -198,6 +211,7 @@ namespace Client
             string userGroup = "";
             string protocol = "";
             string port = "";
+            int portNum = -1;
 
             do
             {
@@ -209,8 +223,12 @@ namespace Client
             {
                 Console.WriteLine("Input protocol: ");
                 protocol = Console.ReadLine();
+                if (protocol == "")
+                    break;
                 ProtocolEnum.Protocols pe;
-                Enum.TryParse<ProtocolEnum.Protocols>(protocol.ToUpper(), out pe);
+                bool isConverted = Enum.TryParse<ProtocolEnum.Protocols>(protocol.ToUpper(), out pe);
+                if (!isConverted)
+                    continue;
                 if (Enum.IsDefined(typeof(ProtocolEnum.Protocols), pe))
                     break;
             }
@@ -219,9 +237,14 @@ namespace Client
             {
                 Console.WriteLine("Input port ");
                 port = Console.ReadLine();
-            } while (port == "" || port == null || Int32.Parse(port) > 65535 || Int32.Parse(port) < 1023);
+                if (port == "" && protocol != "")
+                    break;
+                bool isConverted = Int32.TryParse(port, out portNum);
+                if (!isConverted)
+                    continue;
+            } while (port == "" || port == null || portNum > 65535 || portNum < 1023);
 
-            proxy.RemoveRule(userGroup, protocol, Int32.Parse(port));
+            proxy.RemoveRule(userGroup, protocol, portNum);
         }
     }
 }

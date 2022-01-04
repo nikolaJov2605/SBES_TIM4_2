@@ -117,13 +117,13 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Modifiers" xml:space="preserve">
-    <value>TCP:2900,HTTP</value>
+  <data name="Getter" xml:space="preserve">
+    <value>HTTP:80,UDP</value>
   </data>
   <data name="Runers" xml:space="preserve">
     <value>TCP:8080,UDP</value>
   </data>
-  <data name="Getter" xml:space="preserve">
-    <value>HTTP:80,UDP</value>
+  <data name="Modifiers" xml:space="preserve">
+    <value>TCP:2900,HTTP</value>
   </data>
 </root>

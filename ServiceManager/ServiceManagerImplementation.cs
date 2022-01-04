@@ -118,11 +118,6 @@ namespace ServiceManager
 
             if (canRun)
             {
-                //ERROR: either a required impersonation level was not provided, or the provided impersonation level is invalid
-                //using (windowsIdentity.Impersonate())
-                //{
-                //    StartClientService(protocol, portNumber);
-                //}
                 StartClientService(protocol, portNumber);
             }
             
@@ -142,7 +137,7 @@ namespace ServiceManager
                 Console.WriteLine(e.Message);
             }
 
-            return true;
+            return canRun;
         }
 
         [PrincipalPermission(SecurityAction.Demand, Role = "Modify")]
@@ -223,18 +218,9 @@ namespace ServiceManager
             string filepath = curentPathB + "\\ClientsService\\bin\\Debug\\ClientsService.exe";
             String param = protocol + " " + port.ToString();
 
-            //Process process = new Process();
-            //process.StartInfo.WorkingDirectory = filepath;
-            //process.StartInfo.FileName = "ClientsService.exe ";
-            //process.StartInfo.Arguments = param;
-            //process.StartInfo.Password = new System.Security.SecureString();
-            //process.StartInfo.UseShellExecute = false;
-            //process.StartInfo.RedirectStandardOutput = true;
-
             try
             {
                 Process.Start(filepath, param);
-                //process.Start();
 
             }
             catch(Exception ex)
