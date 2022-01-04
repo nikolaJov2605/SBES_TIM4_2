@@ -17,12 +17,14 @@ namespace ServiceManager
         private SHA256 shaProvider;
 
         private static BlacklistManager managerInstance;
+        private static SortedDictionary<string, string> fileDictionary = new SortedDictionary<string, string>();
 
         public byte[] FileHash { get => fileHash; }
 
 
         private BlacklistManager()
         {
+            UpdateDictionary();
             shaProvider = SHA256.Create();
             fileHash = ComputeHashValue();
         }
@@ -40,19 +42,36 @@ namespace ServiceManager
 
         public byte[] ComputeHashValue()
         {
-            using (FileStream fs = File.OpenRead(path))
+            byte[] retVal = null;
+            while (true)
             {
-                return shaProvider.ComputeHash(fs);
+                try
+                {
+                    using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.None))
+                    {
+                        retVal = shaProvider.ComputeHash(fs);
+                        break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Failed to open and compute hash for Blacklist.resx");
+                    System.Threading.Thread.Sleep(500);
+                }
             }
+
+            return retVal;
+            
         }
 
 
         public bool FileHashValid()
         {
             byte[] currentHashValue;
-            using (FileStream fs = File.OpenRead(path))
+            using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.None))
             {
                 currentHashValue = shaProvider.ComputeHash(fs);
+                fs.Close();
             }
 
             int iterator = 0;
@@ -70,6 +89,33 @@ namespace ServiceManager
 
             return false;
         }
+
+
+
+        private void UpdateDictionary()
+        {
+            while (true)
+            {
+                try
+                {
+                    using (ResXResourceReader rsxr = new ResXResourceReader(path))
+                    {
+                        foreach (DictionaryEntry d in rsxr)
+                        {
+                            fileDictionary[d.Key.ToString()] = (string)d.Value;
+                        }
+                    }
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Failed to open and update Blacklist.resx");
+                    System.Threading.Thread.Sleep(500);
+                }
+            }
+            
+        }
+
 
         public bool PermissionGranted(string[] groups, string protocol, int port, out string reason)
         {
@@ -95,47 +141,48 @@ namespace ServiceManager
             // prodji kroz sve grupe kojima korisnik pripada
             foreach (string group in groups)
             {   // izvuci string sa protokolima:portovima i splituj ga
-                pairsStr = (string)Blacklist.ResourceManager.GetObject(group);
-                pairs = pairsStr.Split(',');
-                foreach (string pair in pairs)
-                {   // ako par ne sadrzi ':', znaci da je naveden samo protokol ili samo port
-                    if (!pair.Contains(':'))
-                    {
-                        int portNum;
-                        bool isNumber = Int32.TryParse(pair, out portNum);  // ako je unet port, isNumber ce biti true, u suprotnom ce biti false
+                if (fileDictionary.ContainsKey(group))
+                {
+                    pairsStr = fileDictionary[group];
+                    pairs = pairsStr.Split(',');
+                    foreach (string pair in pairs)
+                    {   // ako par ne sadrzi ':', znaci da je naveden samo protokol ili samo port
+                        if (!pair.Contains(':'))
+                        {
+                            int portNum;
+                            bool isNumber = Int32.TryParse(pair, out portNum);  // ako je unet port, isNumber ce biti true, u suprotnom ce biti false
 
-                        if (isNumber)   // ako se u konfiguraciji nalazi samo port, poredimo ga sa onim koji je prosledjen i odlucujemo odobravamo li pristup ili ne
-                        {
-                            if (port == portNum)
+                            if (isNumber)   // ako se u konfiguraciji nalazi samo port, poredimo ga sa onim koji je prosledjen i odlucujemo odobravamo li pristup ili ne
                             {
-                                reason = "PORT";
-                                return false;
+                                if (port == portNum)
+                                {
+                                    reason = "PORT";
+                                    return false;
+                                }
+                            }
+                            else            // u suprotnom, ako je u konfiguraciji samo protokol, poredimo ga sa prosledjenim protokolom
+                            {
+                                if (pair.ToUpper() == protocol.ToUpper())
+                                {
+                                    reason = "PROTOCOL";
+                                    return false;
+                                }
                             }
                         }
-                        else            // u suprotnom, ako je u konfiguraciji samo protokol, poredimo ga sa prosledjenim protokolom
+                        else
                         {
-                            if (pair.ToUpper() == protocol.ToUpper())
+                            concretePair = pair.Split(':');
+                            pr = concretePair[0];
+                            por = concretePair[1];
+                            if (protocol.ToUpper() == pr.ToUpper() && port.ToString() == por)
                             {
-                                reason = "PROTOCOL";
+                                reason = "PROTOCOL+PORT";
                                 return false;
                             }
-                        }
-                    }
-                    else
-                    {
-                        concretePair = pair.Split(':');
-                        pr = concretePair[0];
-                        por = concretePair[1];
-                        if (protocol.ToUpper() == pr.ToUpper() && port.ToString() == por)
-                        {
-                            reason = "PROTOCOL+PORT";
-                            return false;
                         }
                     }
                 }
             }
-
-
             return true;
         }
 
@@ -177,7 +224,7 @@ namespace ServiceManager
 
             string addedPair = protocol.ToUpper() + ":" + port;
 
-            string pairsStr = (string)Blacklist.ResourceManager.GetObject(group);
+            string pairsStr = Blacklist.ResourceManager.GetString(group);
             string[] pairs = pairsStr.Split(',');
 
             foreach (string pair in pairs)
@@ -205,7 +252,7 @@ namespace ServiceManager
                     writer.AddResource(kvp.Key, kvp.Value);
                 }
             }
-
+            UpdateDictionary();
             fileHash = ComputeHashValue();
 
         }
@@ -223,7 +270,7 @@ namespace ServiceManager
 
             SortedDictionary<string, string> retDic = new SortedDictionary<string, string>();
 
-            string pairsStr = (string)Blacklist.ResourceManager.GetObject(group);
+            string pairsStr = Blacklist.ResourceManager.GetString(group);
             string[] pairs = pairsStr.Split(',');
 
             pairs = pairs.Where(x => !x.ToUpper().StartsWith(protocol.ToUpper())).ToArray();
@@ -248,6 +295,8 @@ namespace ServiceManager
                 }
             }
 
+
+            UpdateDictionary();
             fileHash = ComputeHashValue();
 
         }
@@ -264,7 +313,7 @@ namespace ServiceManager
             SortedDictionary<string, string> retDic = new SortedDictionary<string, string>();
             List<string> toDelete = new List<string>();
 
-            string pairsStr = (string)Blacklist.ResourceManager.GetObject(group);
+            string pairsStr = Blacklist.ResourceManager.GetString(group);
             string[] pairs = pairsStr.Split(',');
 
             foreach (string pair in pairs)
@@ -316,6 +365,7 @@ namespace ServiceManager
                 }
             }
 
+            UpdateDictionary();
             fileHash = ComputeHashValue();
 
         }
@@ -342,8 +392,13 @@ namespace ServiceManager
             Dictionary<string, string> retDic = new Dictionary<string, string>();
 
             string toDelete = protocol.ToUpper() + ":" + port;
+            //string pairsStr = Blacklist.ResourceManager.GetString(group);
+            if (!fileDictionary.ContainsKey(group))
+            {
+                return;
+            }
 
-            string pairsStr = (string)Blacklist.ResourceManager.GetObject(group);
+            string pairsStr = fileDictionary[group];
             string[] pairs = pairsStr.Split(',');
 
             List<string> outList = new List<string>();
@@ -378,6 +433,7 @@ namespace ServiceManager
                 }
             }
 
+            UpdateDictionary();
             fileHash = ComputeHashValue();
 
         }
@@ -395,7 +451,12 @@ namespace ServiceManager
             Dictionary<string, string> retDic = new Dictionary<string, string>();
 
 
-            string pairsStr = (string)Blacklist.ResourceManager.GetObject(group);
+            if (!fileDictionary.ContainsKey(group))
+            {
+                return;
+            }
+
+            string pairsStr = fileDictionary[group];
             string[] pairs = pairsStr.Split(',');
 
             List<string> outList = new List<string>();
@@ -430,6 +491,7 @@ namespace ServiceManager
                 }
             }
 
+            UpdateDictionary();
             fileHash = ComputeHashValue();
 
         }
@@ -446,8 +508,12 @@ namespace ServiceManager
 
             Dictionary<string, string> retDic = new Dictionary<string, string>();
 
+            if (!fileDictionary.ContainsKey(group))
+            {
+                return;
+            }
 
-            string pairsStr = (string)Blacklist.ResourceManager.GetObject(group);
+            string pairsStr = fileDictionary[group];
             string[] pairs = pairsStr.Split(',');
 
             List<string> outList = new List<string>();
@@ -482,6 +548,7 @@ namespace ServiceManager
                 }
             }
 
+            UpdateDictionary();
             fileHash = ComputeHashValue();
 
         }
