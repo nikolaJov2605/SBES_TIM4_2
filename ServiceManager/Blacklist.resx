@@ -118,12 +118,12 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Getter" xml:space="preserve">
-    <value>HTTP:80,UDP</value>
-  </data>
-  <data name="Runers" xml:space="preserve">
-    <value>TCP:8080,UDP</value>
+    <value>UDP</value>
   </data>
   <data name="Modifiers" xml:space="preserve">
-    <value>TCP:2900,HTTP</value>
+    <value>HTTP,TCP:2200</value>
+  </data>
+  <data name="Runers" xml:space="preserve">
+    <value>,UDP,5000</value>
   </data>
 </root>

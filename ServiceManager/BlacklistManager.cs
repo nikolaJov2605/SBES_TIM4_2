@@ -6,6 +6,7 @@ using System.Linq;
 using System.Resources;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ServiceManager
@@ -52,6 +53,7 @@ namespace ServiceManager
                         retVal = shaProvider.ComputeHash(fs);
                         break;
                     }
+
                 }
                 catch (Exception ex)
                 {
@@ -61,13 +63,14 @@ namespace ServiceManager
             }
 
             return retVal;
-            
+
         }
 
 
         public bool FileHashValid()
         {
             byte[] currentHashValue;
+
             using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.None))
             {
                 currentHashValue = shaProvider.ComputeHash(fs);
@@ -75,6 +78,7 @@ namespace ServiceManager
             }
 
             int iterator = 0;
+
             if (currentHashValue.Length == fileHash.Length)
             {
                 while (iterator < currentHashValue.Length && (currentHashValue[iterator] == fileHash[iterator]))
@@ -104,6 +108,7 @@ namespace ServiceManager
                         {
                             fileDictionary[d.Key.ToString()] = (string)d.Value;
                         }
+                        //rsxr.Close();
                     }
                     break;
                 }
@@ -113,7 +118,7 @@ namespace ServiceManager
                     System.Threading.Thread.Sleep(500);
                 }
             }
-            
+
         }
 
 
@@ -182,6 +187,12 @@ namespace ServiceManager
                         }
                     }
                 }
+                else
+                {
+                    Console.WriteLine($"Specified user group \"{group}\" doesn't exist");
+                    reason = "GROUP";
+                    return false;
+                }
             }
             return true;
         }
@@ -224,13 +235,22 @@ namespace ServiceManager
 
             string addedPair = protocol.ToUpper() + ":" + port;
 
-            string pairsStr = Blacklist.ResourceManager.GetString(group);
+            if (!fileDictionary.ContainsKey(group))
+            {
+                Console.WriteLine($"Specified user group \"{group}\" doesn't exist");
+                return;
+            }
+
+            string pairsStr = fileDictionary[group];
             string[] pairs = pairsStr.Split(',');
 
             foreach (string pair in pairs)
             {
                 if (pair == addedPair)            // ako definisano pravilo vec postoji, prekini izvrsavanje
+                {
+                    Console.WriteLine("Specified rule already exists");
                     return;
+                }
             }
 
             pairs = pairs.Concat(new string[] { addedPair }).ToArray();
@@ -243,6 +263,7 @@ namespace ServiceManager
                     if (d.Key.ToString() != group)
                         retDic.Add(d.Key.ToString(), d.Value.ToString());
                 }
+                rsxr.Close();
             }
             retDic.Add(group, output);
             using (ResXResourceWriter writer = new ResXResourceWriter(path))
@@ -255,6 +276,7 @@ namespace ServiceManager
             UpdateDictionary();
             fileHash = ComputeHashValue();
 
+            Console.WriteLine($"Rule has been successfully added by {Thread.CurrentPrincipal.Identity.Name}");
         }
 
 
@@ -270,7 +292,13 @@ namespace ServiceManager
 
             SortedDictionary<string, string> retDic = new SortedDictionary<string, string>();
 
-            string pairsStr = Blacklist.ResourceManager.GetString(group);
+            if (!fileDictionary.ContainsKey(group))
+            {
+                Console.WriteLine($"Specified user group \"{group}\" doesn't exist");
+                return;
+            }
+
+            string pairsStr = fileDictionary[group];
             string[] pairs = pairsStr.Split(',');
 
             pairs = pairs.Where(x => !x.ToUpper().StartsWith(protocol.ToUpper())).ToArray();
@@ -285,6 +313,7 @@ namespace ServiceManager
                     if (d.Key.ToString() != group)
                         retDic.Add(d.Key.ToString(), d.Value.ToString());
                 }
+                rsxr.Close();
             }
             retDic.Add(group, output);
             using (ResXResourceWriter writer = new ResXResourceWriter(path))
@@ -299,6 +328,7 @@ namespace ServiceManager
             UpdateDictionary();
             fileHash = ComputeHashValue();
 
+            Console.WriteLine($"Rule has been successfully added by {Thread.CurrentPrincipal.Identity.Name}");
         }
 
         // ako dodajemo pravilo u vidu samo porta, onda brisemo sva do tad postojeca pravila vezana za taj port
@@ -313,7 +343,14 @@ namespace ServiceManager
             SortedDictionary<string, string> retDic = new SortedDictionary<string, string>();
             List<string> toDelete = new List<string>();
 
-            string pairsStr = Blacklist.ResourceManager.GetString(group);
+
+            if (!fileDictionary.ContainsKey(group))
+            {
+                Console.WriteLine($"Specified user group \"{group}\" doesn't exist");
+                return;
+            }
+
+            string pairsStr = fileDictionary[group];
             string[] pairs = pairsStr.Split(',');
 
             foreach (string pair in pairs)
@@ -355,6 +392,7 @@ namespace ServiceManager
                     if (d.Key.ToString() != group)
                         retDic.Add(d.Key.ToString(), d.Value.ToString());
                 }
+                rsxr.Close();
             }
             retDic.Add(group, output);
             using (ResXResourceWriter writer = new ResXResourceWriter(path))
@@ -367,6 +405,8 @@ namespace ServiceManager
 
             UpdateDictionary();
             fileHash = ComputeHashValue();
+
+            Console.WriteLine($"Rule has been successfully added by {Thread.CurrentPrincipal.Identity.Name}");
 
         }
 
@@ -395,6 +435,7 @@ namespace ServiceManager
             //string pairsStr = Blacklist.ResourceManager.GetString(group);
             if (!fileDictionary.ContainsKey(group))
             {
+                Console.WriteLine($"Specified user group \"{group}\" doesn't exist");
                 return;
             }
 
@@ -411,7 +452,10 @@ namespace ServiceManager
                 }
             }
             if (pairs.Count() == outList.Count)         // ako u konfiguraciji ne postoji trazeno pravilo, brojevi elemenata kolekcija pre i 
-                return;                                 // posle brisanja ce biti isti i prekinuce se izvrsavanje
+            {                                           // posle brisanja ce biti isti i prekinuce se izvrsavanje
+                Console.WriteLine("Specified rule doesn't exist");
+                return;
+            }
 
 
             string output = String.Join(",", outList);
@@ -423,6 +467,7 @@ namespace ServiceManager
                     if (d.Key.ToString() != group)
                         retDic.Add(d.Key.ToString(), d.Value.ToString());
                 }
+                rsxr.Close();
             }
             retDic.Add(group, output);
             using (ResXResourceWriter writer = new ResXResourceWriter(path))
@@ -436,6 +481,7 @@ namespace ServiceManager
             UpdateDictionary();
             fileHash = ComputeHashValue();
 
+            Console.WriteLine($"Rule has been successfully removed by {Thread.CurrentPrincipal.Identity.Name}");
         }
 
 
@@ -453,6 +499,7 @@ namespace ServiceManager
 
             if (!fileDictionary.ContainsKey(group))
             {
+                Console.WriteLine($"Specified user group \"{group}\" doesn't exist");
                 return;
             }
 
@@ -469,7 +516,10 @@ namespace ServiceManager
                 }
             }
             if (pairs.Count() == outList.Count)
+            {
+                Console.WriteLine("Specified rule doesn't exist");
                 return;
+            }
 
 
             string output = String.Join(",", outList);
@@ -481,6 +531,7 @@ namespace ServiceManager
                     if (d.Key.ToString() != group)
                         retDic.Add(d.Key.ToString(), d.Value.ToString());
                 }
+                rsxr.Close();
             }
             retDic.Add(group, output);
             using (ResXResourceWriter writer = new ResXResourceWriter(path))
@@ -494,6 +545,7 @@ namespace ServiceManager
             UpdateDictionary();
             fileHash = ComputeHashValue();
 
+            Console.WriteLine($"Rule has been successfully removed by {Thread.CurrentPrincipal.Identity.Name}");
         }
 
 
@@ -510,6 +562,7 @@ namespace ServiceManager
 
             if (!fileDictionary.ContainsKey(group))
             {
+                Console.WriteLine($"Specified user group \"{group}\" doesn't exist");
                 return;
             }
 
@@ -526,7 +579,10 @@ namespace ServiceManager
                 }
             }
             if (pairs.Count() == outList.Count)
+            {
+                Console.WriteLine("Specified rule doesn't exist");
                 return;
+            }
 
 
             string output = String.Join(",", outList);
@@ -538,6 +594,7 @@ namespace ServiceManager
                     if (d.Key.ToString() != group)
                         retDic.Add(d.Key.ToString(), d.Value.ToString());
                 }
+                rsxr.Close();
             }
             retDic.Add(group, output);
             using (ResXResourceWriter writer = new ResXResourceWriter(path))
@@ -551,6 +608,7 @@ namespace ServiceManager
             UpdateDictionary();
             fileHash = ComputeHashValue();
 
+            Console.WriteLine($"Rule has been successfully removed by {Thread.CurrentPrincipal.Identity.Name}");
         }
 
         #endregion

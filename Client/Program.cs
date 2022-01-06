@@ -81,28 +81,28 @@ namespace Client
                                 break;
                         }
                     }
-                    
+
 
                     if (isClosed)
                         break;
 
                     Console.WriteLine();
                 }
-                    /*
-                    encryptedData = AES_CBC.EncryptData("MortalKombat,UDP", sessionKey);
+                /*
+                encryptedData = AES_CBC.EncryptData("MortalKombat,UDP", sessionKey);
+                Console.WriteLine(Encoding.ASCII.GetString(encryptedData));
+                proxy.StartNewService(encryptedData);
+                */
+
+                /*
+                for (int i = 1; i < 5; i++)
+                {
+                    encryptedData = AES_CBC.EncryptData("MortalKombat,UDP," + i, sessionKey);
                     Console.WriteLine(Encoding.ASCII.GetString(encryptedData));
                     proxy.StartNewService(encryptedData);
-                    */
-
-                    /*
-                    for (int i = 1; i < 5; i++)
-                    {
-                        encryptedData = AES_CBC.EncryptData("MortalKombat,UDP," + i, sessionKey);
-                        Console.WriteLine(Encoding.ASCII.GetString(encryptedData));
-                        proxy.StartNewService(encryptedData);
-                        Console.ReadKey();
-                    }
-                    */
+                    Console.ReadKey();
+                }
+                */
             }
 
             Console.WriteLine("Press any key to exit...");
@@ -136,7 +136,7 @@ namespace Client
                 machineStr = Console.ReadLine().Trim();
             } while (machineStr == "" || machineStr == null || Regex.IsMatch(machineStr, @"^\d+"));
 
-            while(true)
+            while (true)
             {
                 Console.WriteLine("Input protocol: ");
                 protocol = Console.ReadLine();
@@ -173,6 +173,7 @@ namespace Client
             string protocol = "";
             string port = "";
             int portNum = -1;
+            bool isConverted = false;
 
             do
             {
@@ -180,30 +181,46 @@ namespace Client
                 userGroup = Console.ReadLine().Trim();
             } while (userGroup == "" || userGroup == null);
 
-            while (true)
-            {
-                Console.WriteLine("Input protocol: ");
-                protocol = Console.ReadLine();
-                ProtocolEnum.Protocols pe;
-                bool isConverted = Enum.TryParse<ProtocolEnum.Protocols>(protocol.ToUpper(), out pe);
-                if (!isConverted)
-                    continue;
-                if (Enum.IsDefined(typeof(ProtocolEnum.Protocols), pe))
-                    break;
-            }
 
             do
             {
-                Console.WriteLine("Input port ");
-                port = Console.ReadLine();
-                if (port == "" && protocol != "")
-                    break;
-                bool isConverted = Int32.TryParse(port, out portNum);
-                if (!isConverted)
-                    continue;
-            } while (portNum > 65535 || portNum < 1023);
+                // Unos protokola
+                do
+                {
+                    Console.WriteLine("Input protocol: ");
+                    protocol = Console.ReadLine();
+                    if (protocol == "")
+                        break;
+                    ProtocolEnum.Protocols pe;
+                    isConverted = Enum.TryParse<ProtocolEnum.Protocols>(protocol.ToUpper(), out pe);
+
+                } while (isConverted == false);
+
+                // Unos porta
+                do
+                {
+                    Console.WriteLine("Input port ");
+                    port = Console.ReadLine();
+                    if (port == "")
+                        break;
+                    isConverted = Int32.TryParse(port, out portNum);
+                    if (!isConverted)
+                    {
+                        Console.WriteLine("Port must be a number between 1023 and 65535");
+                        continue;
+                    }
+                } while (portNum > 65535 || portNum < 1023);
+
+                if (protocol == "" && port == "")
+                {
+                    Console.WriteLine("You must define protocol or port");
+                }
+
+            } while (protocol == "" && port == "");
+
 
             proxy.AddRule(userGroup, protocol, portNum);
+
         }
 
         private static void ClientRemoveRule(MakeClient proxy)
