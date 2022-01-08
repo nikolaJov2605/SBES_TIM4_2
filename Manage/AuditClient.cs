@@ -63,7 +63,7 @@ namespace Manage
             }
             catch (Exception e)
             {
-                Console.WriteLine("[TestCommunicationWithAuditer] ERROR = {0} /nTry to start Auditer", e.Message);
+                Console.WriteLine("[TestCommunicationWithAuditer] ERROR = {0} \nTry to start Auditer", e.Message);
             }
         }
 

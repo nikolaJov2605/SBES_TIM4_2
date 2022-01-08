@@ -16,8 +16,8 @@ namespace Audit
     {
         static void Main(string[] args)
         {
-            //string auditCertCN = Formatter.ParseName(WindowsIdentity.GetCurrent().Name);
-            string auditCertCN = "Auditer";
+            string auditCertCN = Formatter.ParseName(WindowsIdentity.GetCurrent().Name);
+            //string auditCertCN = "Auditer";
             
             NetTcpBinding binding = new NetTcpBinding();
             binding.Security.Transport.ClientCredentialType = TcpClientCredentialType.Certificate;
