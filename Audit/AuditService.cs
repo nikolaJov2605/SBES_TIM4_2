@@ -85,7 +85,7 @@ namespace Audit
             if(!unsuccessfulStartAttempts.ContainsKey(username))
             {
                 unsuccessfulStartAttempts[username] = new List<Attempt>();
-                Console.WriteLine("ubacen prvi - {0}:{1}",protocol,port);
+                Console.WriteLine("Added first attempt for user {0} - {1}:{2}",username,protocol,port);
                 unsuccessfulStartAttempts[username].Add(new Attempt(protocol, port, 1, DateTime.Now));
             }
             else
@@ -99,7 +99,6 @@ namespace Audit
                         case "PROTOCOL":
                             if (attempt.Protocol.Equals(protocol))
                             {
-                                Console.WriteLine("check");
                                 exists = true;
                                 if (attempt.CheckTime(DateTime.Now, Convert.ToInt32(ConfigurationManager.AppSettings["timeBetweenAttempts"])) == false)
                                     elementsToRemove.Add(attempt);
@@ -149,7 +148,7 @@ namespace Audit
 
                 if (!exists)
                 {
-                    Console.WriteLine("ubacen novi- {0}:{1}", protocol, port);
+                    Console.WriteLine("Added new attempt for user {0} - {1}:{2}", username, protocol, port);
                     unsuccessfulStartAttempts[username].Add(new Attempt(protocol, port, 1, DateTime.Now));
                 }
 

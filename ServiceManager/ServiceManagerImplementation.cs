@@ -51,9 +51,9 @@ namespace ServiceManager
                 }
             }
 
-            //string serviceCert = Formatter.ParseName(WindowsIdentity.GetCurrent().Name);
+            string serviceCert = Formatter.ParseName(WindowsIdentity.GetCurrent().Name);
             //Console.WriteLine(serviceCert);
-            string serviceCert = "Manager";
+            //string serviceCert = "Manager";
 
             X509Certificate2 certificate = CertManager.GetCertificateFromStorage(StoreName.My, StoreLocation.LocalMachine, serviceCert);
             byte[] sessionKey = SessionKeyHelper.DecryptSessionKey(certificate, encryptedSessionKey);

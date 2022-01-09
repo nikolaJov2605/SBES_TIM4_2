@@ -21,6 +21,7 @@ namespace CertHelper
             // Check that the certificate issuer matches the configured issuer
             string srvCertCN = Formatter.ParseName(WindowsIdentity.GetCurrent().Name);
             //string srvCertCN = "Auditer";
+
             X509Certificate2 servCet = CertManager.GetCertificateFromStorage(StoreName.My, StoreLocation.LocalMachine, srvCertCN);
             if (!certificate.Issuer.Equals(servCet.Issuer))
             {
